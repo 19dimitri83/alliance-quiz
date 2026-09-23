@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alliance Event Registration</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --accent-color: #ff9800;
+            --text-color: #ffffff;
+            --text-secondary: #b3b3b3;
+            --input-bg: #3d3d3d;
+            --border-color: #4d4d4d;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .form-container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
+            border-top: 5px solid var(--accent-color);
+        }
+        .rtl { direction: rtl; text-align: right; }
+        .rtl .radio-label input { margin-left: 8px; margin-right: 0; }
+        h2 { text-align: center; margin-top: 0; color: var(--accent-color); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--accent-color); }
+        .radio-group { display: flex; gap: 15px; }
+        .radio-label { display: flex; align-items: center; font-weight: normal; cursor: pointer; }
+        .radio-label input { margin-right: 5px; }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #e68a00; }
+        .timezone-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: -15px;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container" id="mainContainer">
+    <h2 id="formTitle">Registration</h2>
+<form action="https://formsubmit.co" method="POST" id="quizForm">
+    <div class="form-group">
+        <label id="lblAlliance">1. Alliance Name</label>
+        <select name="alliance" required>
+            <option value="GOD">GOD</option>
+            <option value="PMC">PMC</option>
+            <option value="UNO">UNO</option>
+            <option value="VVV">VVV</option>
+            <option value="pop">pop</option>
+            <option value="MKK">MKK</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label id="lblTroops">2. Troop Type</label>
+        <select name="troops" id="optTroops" required></select>
+    </div>
+    <div class="form-group">
+        <label id="lblTier">3. Tier</label>
+        <select name="tier" required>
+            <option value="T8">Т8</option>
+            <option value="T9">Т9</option>
+            <option value="T10">Т10</option>
+            <option value="T11">Т11</option>
+            <option value="T12">Т12</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label id="lblNickname">4. In-Game Nickname</label>
+        <input type="text" name="nickname" required autocomplete="off">
+    </div>
+    <div class="form-group">
+        <label id="lblSquadSize">5. Squad Size</label>
+        <input type="number" name="squadSize" required min="1">
+    </div>
+    <div class="form-group">
+        <label id="lblMarchSize">6. March Group Size</label>
+        <input type="number" name="marchSize" required min="1">
+    </div>
+    <div class="form-group">
+        <label id="lblAvailability">7. Availability (Your Local Time)</label>
+        <select name="availability" id="optAvailability" required></select>
+    </div>
+    <div class="timezone-info" id="tzInfo"></div>
+    <div class="form-group">
+        <label id="lblCaptain">8. Willingness to be a captain and spend diamonds</label>
+        <div class="radio-group" id="optCaptain"></div>
+    </div>
+    <input type="hidden" name="_next" value="https://formsubmit.co">
+    <button type="submit" id="btnSubmit">Submit</button>
+</form>
+</div>
+<script>
+    const translations = {
+        ru: { title: "Регистрация в событие", alliance: "1. Название альянса", troops: "2. Тип войск", troopsOpts: ["Бойцы", "Наездники", "Стрелки"], tier: "3. Тир", nickname: "4. Игровой ник", squadSize: "5. Размер отряда", marchSize: "6. Размер группы марша", availability: "7. Доступность (Ваше местное время)", shift1: "Первая смена", shift2: "Вторая смена", shiftBoth: "Обе смены", tzDetect: "Часовой пояс: ", captain: "8. Готовность быть капитаном и тратить алмазы", yes: "Да", no: "Нет", submit: "Отправить", success: "Данные успешно приняты!" },
+        en: { title: "Event Registration", alliance: "1. Alliance Name", troops: "2. Troop Type", troopsOpts: ["Infantry", "Riders", "Shooters"], tier: "3. Tier", nickname: "4. In-Game Nickname", squadSize: "5. Squad Size", marchSize: "6. March Group Size", availability: "7. Availability (Your Local Time)", shift1: "First shift", shift2: "Second shift", shiftBoth: "Both shifts", tzDetect: "Timezone detected: ", captain: "8. Willingness to be a captain and spend diamonds", yes: "Yes", no: "No", submit: "Submit", success: "Data successfully submitted!" },
+        de: { title: "Ereignis-Registrierung", alliance: "1. Allianzname", troops: "2. Truppentyp", troopsOpts: ["Infanterie", "Reiter", "Schützen"], tier: "3. Rang (Tier)", nickname: "4. In-Game-Name", squadSize: "5. Truppgröße", marchSize: "6. Marschgruppengröße", availability: "7. Verfügbarkeit (Ihre Ortszeit)", shift1: "Erste Schicht", shift2: "Zweite Schicht", shiftBoth: "Beide Schichten", tzDetect: "Zeitzone: ", captain: "8. Bereit, Kapitän zu sein und Diamanten auszugeben", yes: "Ja", no: "Nein", submit: "Absenden", success: "Erfolgreich übermittelt!" },
+        ja: { title: "イベント登録", alliance: "1. 同盟名", troops: "2. 兵種", troopsOpts: ["歩兵", "ライダー", "シューター"], tier: "3. ティア", nickname: "4. ゲーム内ニックネーム", squadSize: "5. 部隊規模", marchSize: "6. 進軍グループ規模", availability: "7. 参加可能な時間（現地時間）", shift1: "第1シフト", shift2: "第2シフト", shiftBoth: "両方のシフト", tzDetect: "タイムゾーン: ", captain: "8. 隊長になってダイヤを消費する意思があるか", yes: "はい", no: "いいえ", submit: "送信する", success: "送信されました！" },
+        zh: { title: "活动报名", alliance: "1. 联盟名称", troops: "2. 部队类型", troopsOpts: ["步兵", "骑兵", "弓兵"], tier: "3. 士兵等级 (Tier)", nickname: "4. 游戏内昵称", squadSize: "5. 带兵容量", marchSize: "6. 集结规模", availability: "7. 可参加时间 (您的本地时间)", shift1: "第一场", shift2: "第二场", shiftBoth: "两场皆可", tzDetect: "当前时区: ", captain: "8. 是否愿意担任队长并消耗钻石", yes: "是", no: "否", submit: "提交", success: "提交成功！" },
+        vi: { title: "Đăng Ký Sự Kiện", alliance: "1. Tên Liên Minh", troops: "2. Loại Quân", troopsOpts: ["Bộ Binh", "Kỵ Binh", "Xạ Thủ"], tier: "3. Bậc (Tier)", nickname: "4. Tên Trong Game", squadSize: "5. Quy Mô Đội Hình", marchSize: "6. Quy Mô Hành Quân", availability: "7. Thời Gian Tham Gia (Giờ Địa Phương)", shift1: "Ca 1", shift2: "Ca 2", shiftBoth: "Cả hai ca", tzDetect: "Múi giờ: ", captain: "8. Sẵn sàng làm đội trưởng và tiêu kim cương", yes: "Có", no: "Không", submit: "Gửi", success: "Gửi thành công!" },
+        tr: { title: "Etkinlik Kaydı", alliance: "1. İttifak Adı", troops: "2. Birlik Türü", troopsOpts: ["Piyade", "Biniciler", "Nişancılar"], tier: "3. Aşama (Tier)", nickname: "4. Oyun İçi İsim", squadSize: "5. Kıta Kapasitesi", marchSize: "6. Ordusu Boyutu", availability: "7. Uygunluk (Yerel Saatiniz)", shift1: "Birinci Vardiya", shift2: "İkinci Vardiya", shiftBoth: "Her İki Vardiya", tzDetect: "Saat dilimi: ", captain: "8. Kaptan olmaya ve elmas harcamaya istekli misiniz", yes: "Evet", no: "Hayır", submit: "Gönder", success: "Başarıyla gönderildi!" },
+        fr: { title: "Inscription à l'événement", alliance: "1. Nom de l'alliance", troops: "2. Type de troupes", troopsOpts: ["Infanterie", "Cavaliers", "Tireurs"], tier: "3. Niveau (Tier)", nickname: "4. Pseudo en jeu", squadSize: "5. Taille de l'escouade", marchSize: "6. Taille de la marcha", availability: "7. Disponibilité (Heure locale)", shift1: "Premier quart", shift2: "Deuxième quart", shiftBoth: "Les deux quarts", tzDetect: "Fuseau horaire : ", captain: "8. Prêt à être capitaine et à dépenser des diamants", yes: "Oui", no: "Non", submit: "Envoyer", success: "Données soumises avec succès !" },
+        es: { title: "Registro del Evento", alliance: "1. Nombre de la alianza", troops: "2. Tipo de tropas", troopsOpts: ["Infantería", "Jinetes", "Tiradores"], tier: "3. Nivel (Tier)", nickname: "4. Nombre en juego", squadSize: "5. Tamaño de escuadrón", marchSize: "6. Tamaño de marcha", availability: "7. Disponibilidad (Hora local)", shift1: "Primer turno", shift2: "Segundo turno", shiftBoth: "Ambos turnos", tzDetect: "Zona horaria: ", captain: "8. Dispuesto a ser capitán y gastar diamantes", yes: "Sí", no: "No", submit: "Enviar", success: "¡Registrado con éxito!" },
+        pt: { title: "Inscrição no Evento", alliance: "1. Nome da aliança", troops: "2. Tipo de tropas", troopsOpts: ["Infantaria", "Cavaleiros", "Atiradores"], tier: "3. Nível (Tier)", nickname: "4. Nome no jogo", squadSize: "5. Tamanho do esquadrão", marchSize: "6. Tamanho da marcha", availability: "7. Disponibilidade (Hora local)", shift1: "Primeiro turno", shift2: "Segundo turno", shiftBoth: "Ambos os turnos", tzDetect: "Fuso horário: ", captain: "8. Disponibilidade para ser capitão e gastar diamantes", yes: "Sim", no: "Não", submit: "Enviar", success: "Enviado com sucesso!" },
+        ko: { title: "이벤트 등록", alliance: "1. 연맹 이름", troops: "2. 병종 유형", troopsOpts: ["보병", "기병", "궁수"], tier: "3. 티어 (Tier)", nickname: "4. 게임 내 닉네임", squadSize: "5. 부대 규모", marchSize: "6. 행군 규모", availability: "7. 참여 가능 시간 (현지 시간)", shift1: "1차 교대", shift2: "2차 교대", shiftBoth: "두 시간대 모두 가능", tzDetect: "감지된 시간대: ", captain: "8. 대장이 되어 다이아몬드를 소모할 의향이 있습니까", yes: "예", no: "아니오", submit: "제출하기", success: "성공적으로 제출되었습니다!" },
+        ar: { title: "التسجيل في الحدث", alliance: "1. اسم التحالف", troops: "2. نوع القوات", troopsOpts: ["مشاة", "فرسان", "رماة"], tier: "3. المستوى (Tier)", nickname: "4. الاسم داخل اللعبة", squadSize: "5. حجم الفرقة", marchSize: "6. حجم المسيرة", availability: "7. التوفر (حسب توقيتك المحلي)", shift1: "الفترة الأولى", shift2: "الفترة الثانية", shiftBoth: "كلتا الفترتين", tzDetect: "المنطقة الزمنية: ", captain: "8. هل أنت مستعد لتكون قائداً وتستهلك الألماس؟", yes: "نعم", no: "لا", submit: "إرسال", success: "تم إرسال البيانات بنجاح!" }
+    };
+
+    let userLang = navigator.language || navigator.userLanguage;
+    const baseLang = userLang.toLowerCase().split('-');
+    const activeLangKey = translations[baseLang] ? baseLang : 'en';
+    const lang = translations[activeLangKey];
+
+    if (activeLangKey === 'ar') { document.getElementById('mainContainer').classList.add('rtl'); }
+
+    function getLocalTimeStr(mskHour) {
+        const now = new Date();
+        const mskOffset = 3 * 60; 
+        const userOffset = -now.getTimezoneOffset(); 
+        const diffHours = (userOffset - mskOffset) / 60;
+        let localHour = mskHour + diffHours;
+        if (localHour >= 24) localHour -= 24;
+        if (localHour < 0) localHour += 24;
+        return Math.floor(localHour).toString().padStart(2, '0') + ':' + (localHour % 1 * 60).toString().padStart(2, '0');
+    }
+
+    const localTimeShift1 = getLocalTimeStr(13);
+    const localTimeShift2 = getLocalTimeStr(17);
+
+    document.getElementById('formTitle').innerText = lang.title;
+    document.getElementById('lblAlliance').innerText = lang.alliance;
+    document.getElementById('lblTroops').innerText = lang.troops;
+    document.getElementById('lblTier').innerText = lang.tier;
+    document.getElementById('lblNickname').innerText = lang.nickname;
+    document.getElementById('lblSquadSize').innerText = lang.squadSize;
+    document.getElementById('lblMarchSize').innerText = lang.marchSize;
+    document.getElementById('lblAvailability').innerText = lang.availability;
+    document.getElementById('lblCaptain').innerText = lang.captain;
+    document.getElementById('btnSubmit').innerText = lang.submit;
+
+    const troopsSelect = document.getElementById('optTroops');
+    lang.troopsOpts.forEach(val => {
+        let opt = document.createElement('option'); opt.value = val; opt.innerText = val; troopsSelect.appendChild(opt);
+    });
+
+    const availSelect = document.getElementById('optAvailability');
+    const shifts = [
+        { value: "Shift 1", text: lang.shift1 + ' - ' + localTimeShift1 },
+        { value: "Shift 2", text: lang.shift2 + ' - ' + localTimeShift2 },
+        { value: "Both Shifts", text: lang.shiftBoth + ' (' + localTimeShift1 + ' / ' + localTimeShift2 + ')' }
+    ];
+    shifts.forEach(shift => {
+        let opt = document.createElement('option'); opt.value = shift.value; opt.innerText = shift.text; availSelect.appendChild(opt);
+    });
+
+    try {
+        const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById('tzInfo').innerText = lang.tzDetect + tzName;
+    } catch(e) { document.getElementById('tzInfo').style.display = 'none'; }
+
+    document.getElementById('optCaptain').innerHTML = `
+        <label class="radio-label"><input type="radio" name="captain" value="Yes" required> ${lang.yes}</label>
+        <label class="radio-label"><input type="radio" name="captain" value="No"> ${lang.no}</label>
+    `;
+</script>
+</body>
+</html>
