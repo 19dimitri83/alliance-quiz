@@ -1,206 +1,473 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ereignis-Registrierung</title>
-    <style>
-        :root {
-            --bg-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --accent-color: #ff9800;
-            --text-color: #ffffff;
-            --text-secondary: #b3b3b3;
-            --input-bg: #3d3d3d;
-            --border-color: #4d4d4d;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .form-container {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 100%;
-            border-top: 5px solid var(--accent-color);
-        }
-        h2 { text-align: center; margin-top: 0; color: var(--accent-color); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        select, input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        select:focus, input:focus { outline: none; border-color: var(--accent-color); }
-        .radio-group { display: flex; gap: 15px; margin-top: 5px; }
-        .radio-label { display: flex; align-items: center; font-weight: normal; cursor: pointer; }
-        .radio-label input { margin-right: 6px; width: auto; }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--accent-color);
-            color: black;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover { background-color: #e68a00; }
-        .timezone-info {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: -15px;
-            margin-bottom: 15px;
-            font-style: italic;
-        }
-    </style>
-</head>
-<body>
-
-<div class="form-container">
-    <h2 id="formTitle">Ereignis-Registrierung</h2>
-    
-    <!-- HIER IST DEINE NEUE EMAIL NUN FEST EINGETRAGEN: -->
-    <form action="https://formsubmit.co/1791dimon@mail.ru" method="POST" id="quizForm">
-        
-        <!-- 1. Allianz -->
-        <div class="form-group">
-            <label>1. Allianzname</label>
-            <select name="alliance" required>
-                <option value="GOD">GOD</option>
-                <option value="PMC">PMC</option>
-                <option value="UNO">UNO</option>
-                <option value="VVV">VVV</option>
-                <option value="pop">pop</option>
-                <option value="MKK">MKK</option>
-            </select>
-        </div>
-
-        <!-- 2. Truppen -->
-        <div class="form-group">
-            <label>2. Truppentyp</label>
-            <select name="troops" id="optTroops" required></select>
-        </div>
-
-        <!-- 3. Tier -->
-        <div class="form-group">
-            <label>3. Rang (Tier)</label>
-            <select name="tier" required>
-                <option value="T8">T8</option>
-                <option value="T9">T9</option>
-                <option value="T10">T10</option>
-                <option value="T11">T11</option>
-                <option value="T12">T12</option>
-            </select>
-        </div>
-
-        <!-- 4. Nickname -->
-        <div class="form-group">
-            <label>4. In-Game-Name</label>
-            <input type="text" name="nickname" required autocomplete="off">
-        </div>
-
-        <!-- 5. Truppgröße -->
-        <div class="form-group">
-            <label>5. Truppgröße</label>
-            <input type="number" name="squadSize" required min="1">
-        </div>
-
-        <!-- 6. Marschgröße -->
-        <div class="form-group">
-            <label>6. Marschgruppengröße</label>
-            <input type="number" name="marchSize" required min="1">
-        </div>
-
-        <!-- 7. Schichten -->
-        <div class="form-group">
-            <label>7. Verfügbarkeit (Ihre Ortszeit)</label>
-            <select name="availability" id="optAvailability" required></select>
-        </div>
-        <div class="timezone-info" id="tzInfo"></div>
-
-        <!-- 8. Kapitän -->
-        <div class="form-group">
-            <label>8. Bereitschaft, Kapitän zu sein und Diamanten auszugeben</label>
-            <div class="radio-group" id="optCaptain"></div>
-        </div>
-
-        <input type="hidden" name="_next" value="https://formsubmit.co">
-        <button type="submit" id="btnSubmit">Absenden</button>
-    </form>
-</div>
-
-<script>
-    const translations = {
-        ru: { title: "Регистрация в событие", alliance: "1. Название альянса", troops: "2. Тип войск", troopsOpts: ["Бойцы", "Наездники", "Стрелки"], tier: "3. Тир", nickname: "4. Игровой ник", squadSize: "5. Размер отряда", marchSize: "6. Размер группы марша", availability: "7. Доступность (Ваше местное время)", shift1: "Первая смена", shift2: "Вторая смена", shiftBoth: "Обе смены", tzDetect: "Часовой пояс: ", captain: "8. Готовность быть капитаном и тратить алмазы", yes: "Да", no: "Нет", submit: "Отправить" },
-        de: { title: "Ereignis-Registrierung", alliance: "1. Allianzname", troops: "2. Truppentyp", troopsOpts: ["Infanterie", "Reiter", "Schützen"], tier: "3. Rang (Tier)", nickname: "4. In-Game-Name", squadSize: "5. Truppgröße", marchSize: "6. Marschgruppengröße", availability: "7. Verfügbarkeit (Ihre Ortszeit)", shift1: "Erste Schicht", shift2: "Zweite Schicht", shiftBoth: "Beide Schichten", tzDetect: "Zeitzone: ", captain: "8. Bereitschaft, Kapitän zu sein und Diamanten auszugeben", yes: "Ja", no: "Nein", submit: "Absenden" }
-    };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let forcedLang = urlParams.get('lang');
-    
-    let userLang = forcedLang || navigator.language || navigator.userLanguage || 'de';
-    let baseLangKey = userLang.toLowerCase().split('-')[0]; // FIX: Holt jetzt garantiert nur "de" oder "ru"
-    
-    const lang = translations[baseLangKey] ? translations[baseLangKey] : translations['de'];
-
-    function getLocalTimeStr(mskHour) {
-        const now = new Date();
-        const mskOffset = 3 * 60; 
-        const userOffset = -now.getTimezoneOffset(); 
-        const diffHours = (userOffset - mskOffset) / 60;
-        let localHour = mskHour + diffHours;
-        if (localHour >= 24) localHour -= 24;
-        if (localHour < 0) localHour += 24;
-        return Math.floor(localHour).toString().padStart(2, '0') + ':' + (localHour % 1 * 60).toString().padStart(2, '0');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Planner – Wasteland King</title>
+  <style>
+    :root {
+      --anthracite: #474B4C;
+      --anthracite-dark: #2f3334;
+      --yellow: #EBD506;
+      --yellow-soft: #fff8bd;
+      --white: #ffffff;
+      --bg: #f3f5f5;
+      --muted: #687174;
+      --border: #d9dede;
+      --danger: #b83232;
+      --success: #237a4b;
+      --shadow: 0 18px 45px rgba(47, 51, 52, .13);
     }
 
-    const localTimeShift1 = getLocalTimeStr(13);
-    const localTimeShift2 = getLocalTimeStr(17);
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--anthracite-dark);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
 
-    document.getElementById('formTitle').innerText = lang.title;
-    document.getElementById('btnSubmit').innerText = lang.submit;
+    .topbar {
+      background: var(--anthracite);
+      color: var(--white);
+      border-bottom: 5px solid var(--yellow);
+    }
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 24px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      background: var(--yellow);
+      color: var(--anthracite-dark);
+      font-weight: 900;
+      font-size: 20px;
+      border-radius: 6px;
+    }
+    .brand h1 { margin: 0; font-size: 20px; letter-spacing: .2px; }
+    .brand p { margin: 4px 0 0; color: #dfe3e3; font-size: 13px; }
+    .language {
+      border: 1px solid rgba(255,255,255,.35);
+      background: transparent;
+      color: var(--white);
+      padding: 9px 12px;
+      border-radius: 5px;
+    }
 
-    const troopsSelect = document.getElementById('optTroops');
-    lang.troopsOpts.forEach(val => {
-        let opt = document.createElement('option'); opt.value = val; opt.innerText = val; troopsSelect.appendChild(opt);
+    main { max-width: 1180px; margin: 0 auto; padding: 34px 24px 60px; }
+    .intro { max-width: 760px; margin-bottom: 24px; }
+    .eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: 1.4px; font-size: 12px; font-weight: 700; }
+    h2 { margin: 8px 0 10px; font-size: clamp(27px, 4vw, 39px); line-height: 1.08; color: var(--anthracite-dark); }
+    .intro p { margin: 0; color: #5d6668; line-height: 1.6; }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(290px, .6fr); gap: 24px; align-items: start; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 9px; box-shadow: var(--shadow); }
+    .form-card { padding: 28px; }
+    .card-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 23px; }
+    .card-heading h3 { margin: 0; color: var(--anthracite); font-size: 21px; }
+    .required-note { color: var(--muted); font-size: 12px; }
+
+    .section-title { margin: 27px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--yellow); color: var(--anthracite); font-size: 15px; }
+    .section-title:first-of-type { margin-top: 0; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 18px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: var(--anthracite); font-weight: 700; font-size: 13px; }
+    label span { color: var(--danger); }
+    input, select {
+      width: 100%;
+      border: 1px solid #c8d0d1;
+      border-radius: 5px;
+      padding: 12px 12px;
+      color: var(--anthracite-dark);
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus { border-color: var(--anthracite); box-shadow: 0 0 0 3px rgba(235,213,6,.28); }
+    .hint { color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .choice-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .choice { position: relative; }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice label {
+      display: block; text-align: center; padding: 11px 7px; border: 1px solid #c8d0d1; border-radius: 5px; font-weight: 600; cursor: pointer; color: #556062; background: #fff;
+    }
+    .choice input:checked + label { border-color: var(--anthracite); background: var(--yellow-soft); color: var(--anthracite-dark); box-shadow: inset 0 0 0 1px var(--anthracite); }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .primary { border: 0; border-radius: 5px; background: var(--yellow); color: var(--anthracite-dark); padding: 13px 20px; font-weight: 800; }
+    .primary:hover { background: #d9c300; }
+    .secondary { border: 1px solid #bdc6c7; border-radius: 5px; background: #fff; color: var(--anthracite); padding: 12px 17px; font-weight: 700; }
+    .secondary:hover { border-color: var(--anthracite); }
+    .status { min-height: 21px; font-size: 13px; font-weight: 700; }
+    .status.success { color: var(--success); }
+    .status.error { color: var(--danger); }
+
+    .side { display: grid; gap: 18px; }
+    .info-card { padding: 22px; box-shadow: none; }
+    .info-card h3 { margin: 0 0 13px; color: var(--anthracite); font-size: 17px; }
+    .info-card p { color: #5d6668; font-size: 13px; line-height: 1.55; margin: 0; }
+    .steps { display: grid; gap: 13px; margin-top: 17px; }
+    .step { display: grid; grid-template-columns: 29px 1fr; gap: 10px; align-items: start; }
+    .step-number { width: 29px; height: 29px; border-radius: 50%; display: grid; place-items: center; background: var(--yellow); color: var(--anthracite-dark); font-weight: 800; font-size: 13px; }
+    .step strong { display: block; font-size: 13px; color: var(--anthracite); margin-bottom: 2px; }
+    .step small { color: var(--muted); line-height: 1.4; }
+    .admin-card { padding: 22px; border-top: 5px solid var(--anthracite); }
+    .admin-card h3 { margin: 0 0 7px; color: var(--anthracite); font-size: 17px; }
+    .counter { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+    .admin-actions { display: grid; gap: 9px; }
+    .admin-actions button { width: 100%; }
+    .warning { margin-top: 14px; padding: 11px; background: #fff8e4; border-left: 3px solid var(--yellow); color: #6b6124; font-size: 11px; line-height: 1.45; }
+
+    .responses { margin-top: 24px; padding: 24px; display: none; overflow: hidden; }
+    .responses.visible { display: block; }
+    .responses-head { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 16px; }
+    .responses h3 { margin: 0; color: var(--anthracite); }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 12px; }
+    th { background: var(--anthracite); color: #fff; text-align: left; padding: 11px 9px; white-space: nowrap; }
+    td { border-top: 1px solid var(--border); padding: 10px 9px; white-space: nowrap; }
+    tbody tr:nth-child(even) { background: #fafbfb; }
+    .empty { color: var(--muted); padding: 22px; text-align: center; }
+    footer { max-width: 1180px; margin: 0 auto; padding: 0 24px 30px; color: var(--muted); font-size: 11px; }
+
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .admin-card { grid-column: 1 / -1; }
+    }
+    @media (max-width: 590px) {
+      .topbar-inner { padding: 17px 16px; align-items: flex-start; }
+      .brand h1 { font-size: 17px; }
+      .language { padding: 7px 9px; font-size: 12px; }
+      main { padding: 25px 16px 45px; }
+      .form-card { padding: 20px 16px; }
+      .grid, .side { grid-template-columns: 1fr; }
+      .choice-row { grid-template-columns: 1fr; }
+      .actions { align-items: stretch; flex-direction: column; }
+      .actions button { width: 100%; }
+      footer { padding: 0 16px 25px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">SP</div>
+        <div>
+          <h1>Shift Planner – Wasteland King</h1>
+          <p>Spielerdaten für die Shift-Planung</p>
+        </div>
+      </div>
+      <select class="language" aria-label="Language" id="languageSelect">
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+        <option value="ru">Русский</option>
+        <option value="pl">Polski</option>
+        <option value="es">Español</option>
+        <option value="pt">Português</option>
+        <option value="ar">العربية</option>
+        <option value="ko">한국어</option>
+        <option value="ja">日本語</option>
+        <option value="zh">中文</option>
+        <option value="fa">فارسی</option>
+        <option value="vi">Tiếng Việt</option>
+        <option value="nl">Nederlands</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="eyebrow">Spielerregistrierung</div>
+      <h2>Ihre Daten für die nächste Planung</h2>
+      <p>Bitte tragen Sie Ihre aktuellen Spielerdaten vollständig ein. Die Angaben werden für die Verteilung auf zwei Shifts und fünf Gebäude verwendet.</p>
+    </section>
+
+    <div class="layout">
+      <section class="card form-card">
+        <div class="card-heading">
+          <h3>Spielerdaten eingeben</h3>
+          <div class="required-note"><span style="color:var(--danger)">*</span> Pflichtfeld</div>
+        </div>
+
+        <form id="quizForm" novalidate>
+          <div class="section-title" id="sectionIdentification">Identifikation</div>
+          <div class="grid">
+            <div class="field">
+              <label for="alliance">Alliance <span>*</span></label>
+              <input id="alliance" name="alliance" required autocomplete="organization" placeholder="z. B. PMC" />
+            </div>
+            <div class="field">
+              <label for="player">In-Game Name / Player <span>*</span></label>
+              <input id="player" name="player" required autocomplete="nickname" placeholder="Ihr In-Game-Name" />
+            </div>
+          </div>
+
+          <div class="section-title" id="sectionTroops">Truppen und Kapazitäten</div>
+          <div class="grid">
+            <div class="field">
+              <label for="troops">Truppenart <span>*</span></label>
+              <select id="troops" name="troops" required>
+                <option value="">Bitte auswählen</option>
+                <option value="Rider">Rider</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Fighter">Fighter</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="tier">Tier <span>*</span></label>
+              <select id="tier" name="tier" required>
+                <option value="">Bitte auswählen</option>
+                <option value="T1">T1</option>
+                <option value="T2">T2</option>
+                <option value="T3">T3</option>
+                <option value="T4">T4</option>
+                <option value="T5">T5</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="marchSize">March Size <span>*</span></label>
+              <input id="marchSize" name="marchSize" type="number" min="50000" step="5000" required placeholder="z. B. 150000" />
+              <div class="hint">Mindestwert im Prototyp: 50.000. Werte werden in 5.000er-Schritten geführt.</div>
+            </div>
+            <div class="field">
+              <label for="groupAttack">Size of a group attack <span>*</span></label>
+              <input id="groupAttack" name="groupAttack" type="number" min="50000" step="5000" required placeholder="z. B. 500000" />
+            </div>
+          </div>
+
+          <div class="section-title" id="sectionAvailability">Verfügbarkeit und Captain-Funktion</div>
+          <div class="grid">
+            <div class="field full">
+              <label id="availabilityLabel">Availability <span>*</span></label>
+              <div class="shift-times"><span id="shiftTimeFirst"></span> · <span id="shiftTimeSecond"></span></div>
+              <div class="choice-row">
+                <div class="choice"><input id="availability1" type="radio" name="availability" value="First 4 hours" required><label for="availability1">Erster Shift</label></div>
+                <div class="choice"><input id="availability2" type="radio" name="availability" value="Second 4 hours"><label for="availability2">Zweiter Shift</label></div>
+                <div class="choice"><input id="availability3" type="radio" name="availability" value="8 hours"><label for="availability3">Beide Shifts</label></div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="captain">Captain possibility <span>*</span></label>
+              <select id="captain" name="captain" required>
+                <option value="">Bitte auswählen</option>
+                <option value="Ja">Ja</option>
+                <option value="Nein">Nein</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="submitButton" type="submit">Antwort absenden</button>
+            <button class="secondary" id="resetButton" type="reset">Formular leeren</button>
+            <div id="status" class="status" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+      </section>
+
+      <aside class="side">
+        <section class="card info-card">
+          <h3>So funktioniert es</h3>
+          <p>Die Angaben werden später in die bekannte Excel-Struktur des Shift Planners übernommen.</p>
+          <div class="steps">
+            <div class="step"><div class="step-number">1</div><div><strong>Daten eintragen</strong><small>Alle Pflichtfelder ausfüllen.</small></div></div>
+            <div class="step"><div class="step-number">2</div><div><strong>Antwort absenden</strong><small>Die Angaben werden geprüft.</small></div></div>
+            <div class="step"><div class="step-number">3</div><div><strong>Planung erstellen</strong><small>Der Administrator exportiert die Antworten für den Shift Planner.</small></div></div>
+          </div>
+        </section>
+        <section class="card admin-card">
+          <h3>Lokale Testdaten</h3>
+          <div class="counter" id="counter">Noch keine Antworten gespeichert.</div>
+          <div class="admin-actions">
+            <button class="secondary" id="toggleResponses" type="button">Antworten anzeigen</button>
+            <button class="secondary" id="downloadCsv" type="button">CSV für Excel herunterladen</button>
+            <button class="secondary" id="clearResponses" type="button">Testdaten löschen</button>
+          </div>
+          <div class="warning">Dieser HTML-Prototyp speichert Daten nur im aktuellen Browserfenster. Für einen weltweiten Echtbetrieb wird später eine Server-Datenbank benötigt.</div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card responses" id="responsesPanel">
+      <div class="responses-head">
+        <h3>Gesammelte Antworten</h3>
+        <span class="required-note">Lokale Vorschau</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Alliance</th><th>In-Game Name / Player</th><th>Troops</th><th>Tier</th><th>March Size</th><th>Size of a group attack</th><th>Availability</th><th>Captain possibility</th></tr></thead>
+          <tbody id="responseRows"><tr><td colspan="8" class="empty">Noch keine Antworten vorhanden.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>Shift Planner – Wasteland King · Prototyp für die weltweite Web-Erfassung</footer>
+
+  <script>
+    const form = document.getElementById('quizForm');
+    const statusBox = document.getElementById('status');
+    const rows = document.getElementById('responseRows');
+    const counter = document.getElementById('counter');
+    const panel = document.getElementById('responsesPanel');
+    const responses = [];
+
+    const fields = ['alliance', 'player', 'troops', 'tier', 'marchSize', 'groupAttack', 'availability', 'captain'];
+    const labels = { alliance: 'Alliance', player: 'In-Game Name / Player', troops: 'Troops', tier: 'Tier', marchSize: 'March Size', groupAttack: 'Size of a group attack', availability: 'Availability', captain: 'Captain possibility' };
+    const languageSelect = document.getElementById('languageSelect');
+    const translations = {
+      en: {
+        title: 'Shift Planner – Wasteland King', brandSub: 'Player data for shift planning', eyebrow: 'Player registration', heading: 'Your data for the next plan', intro: 'Please enter your current player data completely. The information is used to assign players to two shifts and five buildings.', enter: 'Enter player data', required: 'Required field', identification: 'Identification', troopsSection: 'Troops and capacities', availabilitySection: 'Availability and captain function', alliance: 'Alliance', player: 'In-Game Name / Player', troops: 'Troop type', tier: 'Tier', choose: 'Please select', march: 'March Size', marchPlaceholder: 'e.g. 150000', group: 'Size of a group attack', availability: 'Availability', first: 'First shift', second: 'Second shift', both: 'Both shifts', captain: 'Captain possibility', yes: 'Yes', no: 'No', submit: 'Submit answer', reset: 'Clear form', infoTitle: 'How it works', infoText: 'The data will later be transferred to the known Excel structure of the Shift Planner.', step1: 'Enter data', step1a: 'Complete all required fields.', step2: 'Submit answer', step2a: 'The data is checked.', step3: 'Create plan', step3a: 'The administrator exports the answers for the Shift Planner.', localTitle: 'Local test data', none: 'No answers saved yet.', show: 'Show answers', hide: 'Hide answers', csv: 'Download CSV for Excel', clear: 'Delete test data', warning: 'This HTML prototype stores data only in the current browser. A server database is required for worldwide operation.', collected: 'Collected answers', preview: 'Local preview', empty: 'No answers available yet.', minHint: 'Prototype minimum: 50,000. Values are entered in steps of 5,000.', submitOk: 'Answer saved in local test mode.', requiredError: 'Please check the required fields.', minError: 'March Size and group-attack size must be at least 50,000.', stepError: 'Please use values in steps of 5,000.', csvEmpty: 'There are no answers to export yet.', csvOk: 'CSV file created and can be opened in Excel.', deleted: 'Local test data deleted.', savedOne: 'answer saved.', savedMany: 'answers saved.', footer: 'Prototype for worldwide web data collection'
+      },
+      de: {
+        title: 'Shift Planner – Wasteland King', brandSub: 'Spielerdaten für die Shift-Planung', eyebrow: 'Spielerregistrierung', heading: 'Ihre Daten für die nächste Planung', intro: 'Bitte tragen Sie Ihre aktuellen Spielerdaten vollständig ein. Die Angaben werden für die Verteilung auf zwei Shifts und fünf Gebäude verwendet.', enter: 'Spielerdaten eingeben', required: 'Pflichtfeld', identification: 'Identifikation', troopsSection: 'Truppen und Kapazitäten', availabilitySection: 'Verfügbarkeit und Captain-Funktion', alliance: 'Allianz', player: 'In-Game-Name / Spieler', troops: 'Truppenart', tier: 'Tier', choose: 'Bitte auswählen', march: 'Marschgröße', marchPlaceholder: 'z. B. 150000', group: 'Größe eines Gruppenangriffs', availability: 'Verfügbarkeit', first: 'Erster Shift', second: 'Zweiter Shift', both: 'Beide Shifts', captain: 'Captain-Möglichkeit', yes: 'Ja', no: 'Nein', submit: 'Antwort absenden', reset: 'Formular leeren', infoTitle: 'So funktioniert es', infoText: 'Die Angaben werden später in die bekannte Excel-Struktur des Shift Planners übernommen.', step1: 'Daten eintragen', step1a: 'Alle Pflichtfelder ausfüllen.', step2: 'Antwort absenden', step2a: 'Die Angaben werden geprüft.', step3: 'Planung erstellen', step3a: 'Der Administrator exportiert die Antworten für den Shift Planner.', localTitle: 'Lokale Testdaten', none: 'Noch keine Antworten gespeichert.', show: 'Antworten anzeigen', hide: 'Antworten ausblenden', csv: 'CSV für Excel herunterladen', clear: 'Testdaten löschen', warning: 'Dieser HTML-Prototyp speichert Daten nur im aktuellen Browserfenster. Für einen weltweiten Echtbetrieb wird später eine Server-Datenbank benötigt.', collected: 'Gesammelte Antworten', preview: 'Lokale Vorschau', empty: 'Noch keine Antworten vorhanden.', minHint: 'Mindestwert im Prototyp: 50.000. Werte werden in 5.000er-Schritten geführt.', submitOk: 'Antwort wurde im lokalen Test gespeichert.', requiredError: 'Bitte prüfen Sie die Pflichtfelder.', minError: 'Marschgröße und Gruppenangriffsgröße müssen mindestens 50.000 betragen.', stepError: 'Bitte verwenden Sie Werte in 5.000er-Schritten.', csvEmpty: 'Es gibt noch keine Antworten zum Exportieren.', csvOk: 'CSV-Datei wurde erstellt und kann in Excel geöffnet werden.', deleted: 'Lokale Testdaten wurden gelöscht.', savedOne: 'Antwort gespeichert.', savedMany: 'Antworten gespeichert.', footer: 'Prototyp für die weltweite Web-Erfassung'
+      },
+      fr: { ...{}, title: 'Shift Planner – Wasteland King', brandSub: 'Données des joueurs pour la planification', eyebrow: 'Inscription du joueur', heading: 'Vos données pour la prochaine planification', intro: 'Veuillez saisir toutes vos données actuelles.', enter: 'Saisir les données du joueur', required: 'Champ obligatoire', identification: 'Identification', troopsSection: 'Troupes et capacités', availabilitySection: 'Disponibilité et fonction de capitaine', alliance: 'Alliance', player: 'Nom en jeu / joueur', troops: 'Type de troupe', tier: 'Niveau', choose: 'Sélectionner', march: 'Taille de marche', marchPlaceholder: 'ex. 150000', group: 'Taille d’une attaque de groupe', availability: 'Disponibilité', first: 'Premier shift', second: 'Deuxième shift', both: 'Les deux shifts', captain: 'Possibilité de capitaine', yes: 'Oui', no: 'Non', submit: 'Envoyer la réponse', reset: 'Vider le formulaire', infoTitle: 'Fonctionnement', infoText: 'Les données seront ensuite transférées vers la structure Excel du Shift Planner.', step1: 'Saisir les données', step1a: 'Remplir tous les champs obligatoires.', step2: 'Envoyer la réponse', step2a: 'Les données sont vérifiées.', step3: 'Créer le plan', step3a: 'L’administrateur exporte les réponses.', localTitle: 'Données de test locales', none: 'Aucune réponse enregistrée.', show: 'Afficher les réponses', hide: 'Masquer les réponses', csv: 'Télécharger le CSV pour Excel', clear: 'Supprimer les données de test', warning: 'Ce prototype HTML stocke les données uniquement dans le navigateur actuel.', collected: 'Réponses collectées', preview: 'Aperçu local', empty: 'Aucune réponse disponible.', minHint: 'Minimum du prototype : 50 000. Valeurs par pas de 5 000.', submitOk: 'Réponse enregistrée localement.', requiredError: 'Veuillez vérifier les champs obligatoires.', minError: 'Les tailles doivent être d’au moins 50 000.', stepError: 'Veuillez utiliser des valeurs par pas de 5 000.', csvEmpty: 'Aucune réponse à exporter.', csvOk: 'Le fichier CSV a été créé.', deleted: 'Données de test supprimées.', savedOne: 'réponse enregistrée.', savedMany: 'réponses enregistrées.', footer: 'Prototype de collecte mondiale de données web' }
+    };
+    Object.assign(translations, {
+      ru: { title: 'Shift Planner – Wasteland King', brandSub: 'Данные игроков для планирования смен', eyebrow: 'Регистрация игрока', heading: 'Ваши данные для следующего плана', intro: 'Введите актуальные данные игрока. Они используются для распределения на две смены и пять зданий.', enter: 'Введите данные игрока', required: 'Обязательное поле', identification: 'Идентификация', troopsSection: 'Войска и вместимость', availabilitySection: 'Доступность и роль капитана', alliance: 'Альянс', player: 'Игровое имя / игрок', troops: 'Тип войск', tier: 'Уровень', choose: 'Выберите', march: 'Размер марша', marchPlaceholder: 'например, 150000', group: 'Размер групповой атаки', availability: 'Доступность', first: 'Первая смена', second: 'Вторая смена', both: 'Обе смены', captain: 'Возможность быть капитаном', yes: 'Да', no: 'Нет', submit: 'Отправить ответ', reset: 'Очистить форму', infoTitle: 'Как это работает', infoText: 'Данные будут перенесены в структуру Excel планировщика.', step1: 'Введите данные', step1a: 'Заполните обязательные поля.', step2: 'Отправьте ответ', step2a: 'Данные будут проверены.', step3: 'Создайте план', step3a: 'Администратор экспортирует ответы.', localTitle: 'Локальные тестовые данные', none: 'Ответов пока нет.', show: 'Показать ответы', hide: 'Скрыть ответы', csv: 'Скачать CSV для Excel', clear: 'Удалить тестовые данные', warning: 'Этот HTML-прототип хранит данные только в текущем браузере. Для работы по всему миру нужна серверная база данных.', collected: 'Собранные ответы', preview: 'Локальный просмотр', empty: 'Ответов пока нет.', minHint: 'Минимум прототипа: 50 000. Значения вводятся с шагом 5 000.', submitOk: 'Ответ сохранён в локальном режиме.', requiredError: 'Проверьте обязательные поля.', minError: 'Размер марша и групповой атаки должны быть не менее 50 000.', stepError: 'Используйте значения с шагом 5 000.', csvEmpty: 'Нет ответов для экспорта.', csvOk: 'CSV-файл создан и может быть открыт в Excel.', deleted: 'Локальные тестовые данные удалены.', savedOne: 'ответ сохранён.', savedMany: 'ответов сохранено.', footer: 'Прототип всемирного сбора данных через интернет' },
+      pl: { title: 'Shift Planner – Wasteland King', brandSub: 'Dane graczy do planowania zmian', eyebrow: 'Rejestracja gracza', heading: 'Twoje dane do następnego planu', intro: 'Wpisz aktualne dane gracza. Służą one do przydziału do dwóch zmian i pięciu budynków.', enter: 'Wprowadź dane gracza', required: 'Pole wymagane', identification: 'Identyfikacja', troopsSection: 'Wojska i pojemności', availabilitySection: 'Dostępność i funkcja kapitana', alliance: 'Sojusz', player: 'Nazwa w grze / gracz', troops: 'Typ wojsk', tier: 'Poziom', choose: 'Wybierz', march: 'Rozmiar marszu', marchPlaceholder: 'np. 150000', group: 'Rozmiar ataku grupowego', availability: 'Dostępność', first: 'Pierwsza zmiana', second: 'Druga zmiana', both: 'Obie zmiany', captain: 'Możliwość bycia kapitanem', yes: 'Tak', no: 'Nie', submit: 'Wyślij odpowiedź', reset: 'Wyczyść formularz', infoTitle: 'Jak to działa', infoText: 'Dane zostaną później przeniesione do struktury Excela planera.', step1: 'Wprowadź dane', step1a: 'Uzupełnij wymagane pola.', step2: 'Wyślij odpowiedź', step2a: 'Dane zostaną sprawdzone.', step3: 'Utwórz plan', step3a: 'Administrator wyeksportuje odpowiedzi.', localTitle: 'Lokalne dane testowe', none: 'Brak zapisanych odpowiedzi.', show: 'Pokaż odpowiedzi', hide: 'Ukryj odpowiedzi', csv: 'Pobierz CSV dla Excela', clear: 'Usuń dane testowe', warning: 'Ten prototyp HTML zapisuje dane tylko w bieżącej przeglądarce. Do działania na całym świecie potrzebna jest baza serwerowa.', collected: 'Zebrane odpowiedzi', preview: 'Podgląd lokalny', empty: 'Brak odpowiedzi.', minHint: 'Minimum prototypu: 50 000. Wartości podawaj co 5 000.', submitOk: 'Odpowiedź zapisana lokalnie.', requiredError: 'Sprawdź wymagane pola.', minError: 'Rozmiar marszu i ataku grupowego musi wynosić co najmniej 50 000.', stepError: 'Użyj wartości co 5 000.', csvEmpty: 'Brak odpowiedzi do eksportu.', csvOk: 'Utworzono plik CSV.', deleted: 'Usunięto lokalne dane testowe.', savedOne: 'zapisana odpowiedź.', savedMany: 'zapisanych odpowiedzi.', footer: 'Prototyp światowego zbierania danych w sieci' },
+      es: { title: 'Shift Planner – Wasteland King', brandSub: 'Datos de jugadores para planificar turnos', eyebrow: 'Registro del jugador', heading: 'Tus datos para el próximo plan', intro: 'Introduce tus datos actuales. Se usarán para asignar jugadores a dos turnos y cinco edificios.', enter: 'Introducir datos del jugador', required: 'Campo obligatorio', identification: 'Identificación', troopsSection: 'Tropas y capacidades', availabilitySection: 'Disponibilidad y función de capitán', alliance: 'Alianza', player: 'Nombre del juego / jugador', troops: 'Tipo de tropas', tier: 'Nivel', choose: 'Seleccionar', march: 'Tamaño de marcha', marchPlaceholder: 'p. ej. 150000', group: 'Tamaño de ataque grupal', availability: 'Disponibilidad', first: 'Primer turno', second: 'Segundo turno', both: 'Ambos turnos', captain: 'Posibilidad de capitán', yes: 'Sí', no: 'No', submit: 'Enviar respuesta', reset: 'Borrar formulario', infoTitle: 'Cómo funciona', infoText: 'Los datos se transferirán después a la estructura de Excel del planificador.', step1: 'Introducir datos', step1a: 'Completa todos los campos obligatorios.', step2: 'Enviar respuesta', step2a: 'Se comprobarán los datos.', step3: 'Crear plan', step3a: 'El administrador exportará las respuestas.', localTitle: 'Datos de prueba locales', none: 'Aún no hay respuestas guardadas.', show: 'Mostrar respuestas', hide: 'Ocultar respuestas', csv: 'Descargar CSV para Excel', clear: 'Borrar datos de prueba', warning: 'Este prototipo HTML guarda datos solo en el navegador actual. Para operar en todo el mundo se necesita una base de datos del servidor.', collected: 'Respuestas recopiladas', preview: 'Vista previa local', empty: 'Aún no hay respuestas.', minHint: 'Mínimo del prototipo: 50.000. Valores en pasos de 5.000.', submitOk: 'Respuesta guardada localmente.', requiredError: 'Comprueba los campos obligatorios.', minError: 'El tamaño de marcha y de ataque grupal debe ser de al menos 50.000.', stepError: 'Usa valores en pasos de 5.000.', csvEmpty: 'No hay respuestas para exportar.', csvOk: 'Archivo CSV creado.', deleted: 'Datos de prueba eliminados.', savedOne: 'respuesta guardada.', savedMany: 'respuestas guardadas.', footer: 'Prototipo para recopilar datos web en todo el mundo' },
+      pt: { title: 'Shift Planner – Wasteland King', brandSub: 'Dados dos jogadores para planeamento de turnos', eyebrow: 'Registo do jogador', heading: 'Os seus dados para o próximo plano', intro: 'Introduza os seus dados atuais. Serão usados para distribuir jogadores por dois turnos e cinco edifícios.', enter: 'Introduzir dados do jogador', required: 'Campo obrigatório', identification: 'Identificação', troopsSection: 'Tropas e capacidades', availabilitySection: 'Disponibilidade e função de capitão', alliance: 'Aliança', player: 'Nome no jogo / jogador', troops: 'Tipo de tropas', tier: 'Nível', choose: 'Selecionar', march: 'Tamanho da marcha', marchPlaceholder: 'ex. 150000', group: 'Tamanho do ataque de grupo', availability: 'Disponibilidade', first: 'Primeiro turno', second: 'Segundo turno', both: 'Ambos os turnos', captain: 'Possibilidade de capitão', yes: 'Sim', no: 'Não', submit: 'Enviar resposta', reset: 'Limpar formulário', infoTitle: 'Como funciona', infoText: 'Os dados serão posteriormente transferidos para a estrutura Excel do planeador.', step1: 'Introduzir dados', step1a: 'Preencha os campos obrigatórios.', step2: 'Enviar resposta', step2a: 'Os dados serão verificados.', step3: 'Criar plano', step3a: 'O administrador exportará as respostas.', localTitle: 'Dados de teste locais', none: 'Ainda não existem respostas guardadas.', show: 'Mostrar respostas', hide: 'Ocultar respostas', csv: 'Transferir CSV para Excel', clear: 'Eliminar dados de teste', warning: 'Este protótipo HTML guarda dados apenas no navegador atual. Para utilização mundial é necessária uma base de dados no servidor.', collected: 'Respostas recolhidas', preview: 'Pré-visualização local', empty: 'Ainda não existem respostas.', minHint: 'Mínimo do protótipo: 50 000. Valores em passos de 5 000.', submitOk: 'Resposta guardada localmente.', requiredError: 'Verifique os campos obrigatórios.', minError: 'O tamanho da marcha e do ataque de grupo deve ser pelo menos 50 000.', stepError: 'Use valores em passos de 5 000.', csvEmpty: 'Não existem respostas para exportar.', csvOk: 'Ficheiro CSV criado.', deleted: 'Dados de teste eliminados.', savedOne: 'resposta guardada.', savedMany: 'respostas guardadas.', footer: 'Protótipo para recolha mundial de dados pela internet' },
+      nl: { title: 'Shift Planner – Wasteland King', brandSub: 'Spelersgegevens voor shiftplanning', eyebrow: 'Spelerregistratie', heading: 'Uw gegevens voor het volgende plan', intro: 'Vul uw actuele spelersgegevens in. Deze worden gebruikt voor de verdeling over twee shifts en vijf gebouwen.', enter: 'Spelersgegevens invoeren', required: 'Verplicht veld', identification: 'Identificatie', troopsSection: 'Troepen en capaciteiten', availabilitySection: 'Beschikbaarheid en kapiteinsfunctie', alliance: 'Alliantie', player: 'In-game naam / speler', troops: 'Troepentype', tier: 'Niveau', choose: 'Selecteren', march: 'Marchgrootte', marchPlaceholder: 'bijv. 150000', group: 'Grootte van groepsaanval', availability: 'Beschikbaarheid', first: 'Eerste shift', second: 'Tweede shift', both: 'Beide shifts', captain: 'Mogelijkheid als kapitein', yes: 'Ja', no: 'Nee', submit: 'Antwoord verzenden', reset: 'Formulier wissen', infoTitle: 'Zo werkt het', infoText: 'De gegevens worden later overgezet naar de Excel-structuur van de Shift Planner.', step1: 'Gegevens invoeren', step1a: 'Vul alle verplichte velden in.', step2: 'Antwoord verzenden', step2a: 'De gegevens worden gecontroleerd.', step3: 'Plan maken', step3a: 'De beheerder exporteert de antwoorden.', localTitle: 'Lokale testgegevens', none: 'Nog geen antwoorden opgeslagen.', show: 'Antwoorden tonen', hide: 'Antwoorden verbergen', csv: 'CSV voor Excel downloaden', clear: 'Testgegevens verwijderen', warning: 'Dit HTML-prototype slaat gegevens alleen op in de huidige browser. Voor wereldwijd gebruik is een serverdatabase nodig.', collected: 'Verzamelde antwoorden', preview: 'Lokale voorbeeldweergave', empty: 'Nog geen antwoorden.', minHint: 'Minimum van het prototype: 50.000. Waarden in stappen van 5.000.', submitOk: 'Antwoord lokaal opgeslagen.', requiredError: 'Controleer de verplichte velden.', minError: 'March- en groepsaanvalsgrootte moeten minstens 50.000 zijn.', stepError: 'Gebruik waarden in stappen van 5.000.', csvEmpty: 'Er zijn nog geen antwoorden om te exporteren.', csvOk: 'CSV-bestand gemaakt.', deleted: 'Lokale testgegevens verwijderd.', savedOne: 'antwoord opgeslagen.', savedMany: 'antwoorden opgeslagen.', footer: 'Prototype voor wereldwijde webgegevensverzameling' },
+      vi: { title: 'Shift Planner – Wasteland King', brandSub: 'Dữ liệu người chơi để lập kế hoạch ca', eyebrow: 'Đăng ký người chơi', heading: 'Dữ liệu của bạn cho kế hoạch tiếp theo', intro: 'Vui lòng nhập đầy đủ dữ liệu hiện tại. Dữ liệu được dùng để phân công vào hai ca và năm tòa nhà.', enter: 'Nhập dữ liệu người chơi', required: 'Trường bắt buộc', identification: 'Nhận dạng', troopsSection: 'Quân đội và sức chứa', availabilitySection: 'Khả dụng và vai trò đội trưởng', alliance: 'Liên minh', player: 'Tên trong game / người chơi', troops: 'Loại quân', tier: 'Cấp', choose: 'Chọn', march: 'Quy mô hành quân', marchPlaceholder: 'ví dụ 150000', group: 'Quy mô tấn công nhóm', availability: 'Khả dụng', first: 'Ca đầu', second: 'Ca thứ hai', both: 'Cả hai ca', captain: 'Có thể làm đội trưởng', yes: 'Có', no: 'Không', submit: 'Gửi câu trả lời', reset: 'Xóa biểu mẫu', infoTitle: 'Cách hoạt động', infoText: 'Dữ liệu sau đó sẽ được chuyển vào cấu trúc Excel của Shift Planner.', step1: 'Nhập dữ liệu', step1a: 'Điền các trường bắt buộc.', step2: 'Gửi câu trả lời', step2a: 'Dữ liệu sẽ được kiểm tra.', step3: 'Tạo kế hoạch', step3a: 'Quản trị viên sẽ xuất các câu trả lời.', localTitle: 'Dữ liệu thử nghiệm cục bộ', none: 'Chưa có câu trả lời.', show: 'Hiện câu trả lời', hide: 'Ẩn câu trả lời', csv: 'Tải CSV cho Excel', clear: 'Xóa dữ liệu thử nghiệm', warning: 'Bản HTML này chỉ lưu dữ liệu trong trình duyệt hiện tại. Cần có cơ sở dữ liệu máy chủ để hoạt động trên toàn thế giới.', collected: 'Câu trả lời đã thu thập', preview: 'Xem trước cục bộ', empty: 'Chưa có câu trả lời.', minHint: 'Mức tối thiểu: 50.000. Giá trị theo bước 5.000.', submitOk: 'Đã lưu câu trả lời cục bộ.', requiredError: 'Vui lòng kiểm tra các trường bắt buộc.', minError: 'Quy mô hành quân và tấn công nhóm phải ít nhất 50.000.', stepError: 'Vui lòng dùng giá trị theo bước 5.000.', csvEmpty: 'Chưa có câu trả lời để xuất.', csvOk: 'Đã tạo tệp CSV.', deleted: 'Đã xóa dữ liệu thử nghiệm cục bộ.', savedOne: 'câu trả lời đã lưu.', savedMany: 'câu trả lời đã lưu.', footer: 'Bản thử nghiệm thu thập dữ liệu web trên toàn thế giới' }
+    });
+    const addEnglishFallback = values => ({ ...translations.en, ...values });
+    const extraLanguageNames = { ar: 'العربية', ko: '한국어', ja: '日本語', zh: '中文', fa: 'فارسی' };
+    ['ar', 'ko', 'ja', 'zh', 'fa'].forEach(code => { translations[code] = addEnglishFallback({ brandSub: extraLanguageNames[code] }); });
+    /*
+      ru: { brandSub:'Данные игроков для планирования смен', eyebrow:'Регистрация игрока', heading:'Ваши данные для следующего плана', intro:'Введите актуальные данные игрока для распределения на две смены и пять зданий.', enter:'Введите данные игрока', required:'Обязательное поле', identification:'Идентификация', troopsSection:'Войска и вместимость', availabilitySection:'Доступность и роль капитана', alliance:'Альянс', player:'Игровое имя / игрок', troops:'Тип войск', tier:'Уровень', choose:'Выберите', march:'Размер марша', group:'Размер групповой атаки', availability:'Доступность', first:'Первая смена', second:'Вторая смена', both:'Обе смены', captain:'Возможность быть капитаном', yes:'Да', no:'Нет', submit:'Отправить ответ', reset:'Очистить форму', infoTitle:'Как это работает', infoText:'Данные будут перенесены в структуру Excel планировщика.', step1:'Введите данные', step1a:'Заполните обязательные поля.', step2:'Отправьте ответ', step2a:'Данные будут проверены.', step3:'Создайте план', step3a:'Администратор экспортирует ответы.', localTitle:'Локальные тестовые данные', none:'Ответов пока нет.', show:'Показать ответы', hide:'Скрыть ответы', csv:'Скачать CSV для Excel', clear:'Удалить тестовые данные', warning:'Этот HTML-прототип хранит данные только в текущем браузере. Для работы по всему миру нужна серверная база данных.', collected:'Собранные ответы', preview:'Локальный просмотр', empty:'Ответов пока нет.', minHint:'Минимум: 50 000. Значения вводятся с шагом 5 000.', submitOk:'Ответ сохранён локально.', requiredError:'Проверьте обязательные поля.', minError:'Размеры должны быть не менее 50 000.', stepError:'Используйте шаг 5 000.', csvEmpty:'Нет ответов для экспорта.', csvOk:'CSV-файл создан.', deleted:'Тестовые данные удалены.', savedOne:'ответ сохранён.', savedMany:'ответов сохранено.', footer:'Прототип всемирного сбора данных через интернет' },
+      pl: { brandSub:'Dane graczy do planowania zmian', eyebrow:'Rejestracja gracza', heading:'Twoje dane do następnego planu', intro:'Wpisz aktualne dane gracza do przydziału na dwie zmiany i pięć budynków.', enter:'Wprowadź dane gracza', required:'Pole wymagane', identification:'Identyfikacja', troopsSection:'Wojska i pojemności', availabilitySection:'Dostępność i funkcja kapitana', alliance:'Sojusz', player:'Nazwa w grze / gracz', troops:'Typ wojsk', tier:'Poziom', choose:'Wybierz', march:'Rozmiar marszu', group:'Rozmiar ataku grupowego', availability:'Dostępność', first:'Pierwsza zmiana', second:'Druga zmiana', both:'Obie zmiany', captain:'Możliwość bycia kapitanem', yes:'Tak', no:'Nie', submit:'Wyślij odpowiedź', reset:'Wyczyść formularz', infoTitle:'Jak to działa', infoText:'Dane zostaną przeniesione do struktury Excela planera.', step1:'Wprowadź dane', step1a:'Uzupełnij wymagane pola.', step2:'Wyślij odpowiedź', step2a:'Dane zostaną sprawdzone.', step3:'Utwórz plan', step3a:'Administrator wyeksportuje odpowiedzi.', localTitle:'Lokalne dane testowe', none:'Brak zapisanych odpowiedzi.', show:'Pokaż odpowiedzi', hide:'Ukryj odpowiedzi', csv:'Pobierz CSV dla Excela', clear:'Usuń dane testowe', warning:'Ten prototyp HTML zapisuje dane tylko w bieżącej przeglądarce. Do działania na całym świecie potrzebna jest baza serwerowa.', collected:'Zebrane odpowiedzi', preview:'Podgląd lokalny', empty:'Brak odpowiedzi.', minHint:'Minimum: 50 000. Wartości co 5 000.', submitOk:'Odpowiedź zapisana lokalnie.', requiredError:'Sprawdź wymagane pola.', minError:'Wartości muszą wynosić co najmniej 50 000.', stepError:'Użyj wartości co 5 000.', csvEmpty:'Brak odpowiedzi do eksportu.', csvOk:'Utworzono plik CSV.', deleted:'Usunięto dane testowe.', savedOne:'zapisana odpowiedź.', savedMany:'zapisanych odpowiedzi.', footer:'Prototyp światowego zbierania danych w sieci' },
+      es: { brandSub:'Datos de jugadores para planificar turnos', eyebrow:'Registro del jugador', heading:'Tus datos para el próximo plan', intro:'Introduce tus datos actuales para asignarlos a dos turnos y cinco edificios.', enter:'Introducir datos del jugador', required:'Campo obligatorio', identification:'Identificación', troopsSection:'Tropas y capacidades', availabilitySection:'Disponibilidad y función de capitán', alliance:'Alianza', player:'Nombre del juego / jugador', troops:'Tipo de tropas', tier:'Nivel', choose:'Seleccionar', march:'Tamaño de marcha', group:'Tamaño de ataque grupal', availability:'Disponibilidad', first:'Primer turno', second:'Segundo turno', both:'Ambos turnos', captain:'Posibilidad de capitán', yes:'Sí', no:'No', submit:'Enviar respuesta', reset:'Borrar formulario', infoTitle:'Cómo funciona', infoText:'Los datos se transferirán a la estructura Excel del planificador.', step1:'Introducir datos', step1a:'Completa los campos obligatorios.', step2:'Enviar respuesta', step2a:'Se comprobarán los datos.', step3:'Crear plan', step3a:'El administrador exportará las respuestas.', localTitle:'Datos de prueba locales', none:'Aún no hay respuestas guardadas.', show:'Mostrar respuestas', hide:'Ocultar respuestas', csv:'Descargar CSV para Excel', clear:'Borrar datos de prueba', warning:'Este prototipo guarda datos solo en el navegador actual. Para operar en todo el mundo se necesita una base de datos.', collected:'Respuestas recopiladas', preview:'Vista previa local', empty:'Aún no hay respuestas.', minHint:'Mínimo: 50.000. Valores en pasos de 5.000.', submitOk:'Respuesta guardada localmente.', requiredError:'Comprueba los campos obligatorios.', minError:'Los tamaños deben ser de al menos 50.000.', stepError:'Usa valores en pasos de 5.000.', csvEmpty:'No hay respuestas para exportar.', csvOk:'Archivo CSV creado.', deleted:'Datos de prueba eliminados.', savedOne:'respuesta guardada.', savedMany:'respuestas guardadas.', footer:'Prototipo para recopilar datos web en todo el mundo' },
+      pt: { ...{}, brandSub:'Dados dos jogadores para planeamento de turnos', eyebrow:'Registo do jogador', heading:'Os seus dados para o próximo plano', intro:'Introduza os seus dados atuais para distribuição por dois turnos e cinco edifícios.', enter:'Introduzir dados do jogador', required:'Campo obrigatório', identification:'Identificação', troopsSection:'Tropas e capacidades', availabilitySection:'Disponibilidade e função de capitão', alliance:'Aliança', player:'Nome no jogo / jogador', troops:'Tipo de tropas', tier:'Nível', choose:'Selecionar', march:'Tamanho da marcha', group:'Tamanho do ataque de grupo', availability:'Disponibilidade', first:'Primeiro turno', second:'Segundo turno', both:'Ambos os turnos', captain:'Possibilidade de capitão', yes:'Sim', no:'Não', submit:'Enviar resposta', reset:'Limpar formulário', infoTitle:'Como funciona', infoText:'Os dados serão transferidos para a estrutura Excel do planeador.', step1:'Introduzir dados', step1a:'Preencha os campos obrigatórios.', step2:'Enviar resposta', step2a:'Os dados serão verificados.', step3:'Criar plano', step3a:'O administrador exportará as respostas.', localTitle:'Dados de teste locais', none:'Ainda não existem respostas guardadas.', show:'Mostrar respostas', hide:'Ocultar respostas', csv:'Transferir CSV para Excel', clear:'Eliminar dados de teste', warning:'Este protótipo guarda dados apenas no navegador atual. Para utilização mundial é necessária uma base de dados.', collected:'Respostas recolhidas', preview:'Pré-visualização local', empty:'Ainda não existem respostas.', minHint:'Mínimo: 50 000. Valores em passos de 5 000.', submitOk:'Resposta guardada localmente.', requiredError:'Verifique os campos obrigatórios.', minError:'Os tamanhos devem ser pelo menos 50 000.', stepError:'Use valores em passos de 5 000.', csvEmpty:'Não existem respostas para exportar.', csvOk:'Ficheiro CSV criado.', deleted:'Dados de teste eliminados.', savedOne:'resposta guardada.', savedMany:'respostas guardadas.', footer:'Protótipo para recolha mundial de dados pela internet' },
+      nl: { ...{}, brandSub:'Spelersgegevens voor shiftplanning', eyebrow:'Spelerregistratie', heading:'Uw gegevens voor het volgende plan', intro:'Vul uw actuele spelersgegevens in voor de verdeling over twee shifts en vijf gebouwen.', enter:'Spelersgegevens invoeren', required:'Verplicht veld', identification:'Identificatie', troopsSection:'Troepen en capaciteiten', availabilitySection:'Beschikbaarheid en kapiteinsfunctie', alliance:'Alliantie', player:'In-game naam / speler', troops:'Troepentype', tier:'Niveau', choose:'Selecteren', march:'Marchgrootte', group:'Grootte van groepsaanval', availability:'Beschikbaarheid', first:'Eerste shift', second:'Tweede shift', both:'Beide shifts', captain:'Mogelijkheid als kapitein', yes:'Ja', no:'Nee', submit:'Antwoord verzenden', reset:'Formulier wissen', infoTitle:'Zo werkt het', infoText:'De gegevens worden overgezet naar de Excel-structuur van de Shift Planner.', step1:'Gegevens invoeren', step1a:'Vul alle verplichte velden in.', step2:'Antwoord verzenden', step2a:'De gegevens worden gecontroleerd.', step3:'Plan maken', step3a:'De beheerder exporteert de antwoorden.', localTitle:'Lokale testgegevens', none:'Nog geen antwoorden opgeslagen.', show:'Antwoorden tonen', hide:'Antwoorden verbergen', csv:'CSV voor Excel downloaden', clear:'Testgegevens verwijderen', warning:'Dit prototype slaat gegevens alleen op in de huidige browser. Voor wereldwijd gebruik is een serverdatabase nodig.', collected:'Verzamelde antwoorden', preview:'Lokale voorbeeldweergave', empty:'Nog geen antwoorden.', minHint:'Minimum: 50.000. Waarden in stappen van 5.000.', submitOk:'Antwoord lokaal opgeslagen.', requiredError:'Controleer de verplichte velden.', minError:'De waarden moeten minstens 50.000 zijn.', stepError:'Gebruik waarden in stappen van 5.000.', csvEmpty:'Er zijn geen antwoorden om te exporteren.', csvOk:'CSV-bestand gemaakt.', deleted:'Lokale testgegevens verwijderd.', savedOne:'antwoord opgeslagen.', savedMany:'antwoorden opgeslagen.', footer:'Prototype voor wereldwijde webgegevensverzameling' }
+    };
+    Object.keys(compactTranslations).forEach(code => { translations[code] = { ...translations.en, ...translations[code], ...compactTranslations[code] }; });
+    */
+    const localeByLanguage = { en: 'en-US', de: 'de-DE', fr: 'fr-FR', ru: 'ru-RU', pl: 'pl-PL', es: 'es-ES', pt: 'pt-PT', ar: 'ar', ko: 'ko-KR', ja: 'ja-JP', zh: 'zh-CN', fa: 'fa-IR', vi: 'vi-VN', nl: 'nl-NL' };
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const today = new Date();
+    const utcDate = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+    const shiftTimes = { first: `${utcDate}T10:00:00Z`, second: `${utcDate}T14:00:00Z` };
+    function browserLanguage() {
+      const candidates = navigator.languages?.length ? navigator.languages : [navigator.language];
+      const found = candidates.map(value => String(value || '').toLowerCase().split('-')[0]).find(code => supportedLanguages.includes(code));
+      return found || 'en';
+    }
+    function tr(key) { return (translations[currentLanguage] || translations.en)[key] || translations.en[key] || key; }
+    function localShiftTime(key) {
+      return new Intl.DateTimeFormat(currentLocale, { timeZone, hour: '2-digit', minute: '2-digit', timeZoneName: 'short' }).format(new Date(shiftTimes[key]));
+    }
+    function applyLanguage(language, automatic = false) {
+      currentLanguage = supportedLanguages.includes(language) ? language : 'en';
+      currentLocale = localeByLanguage[currentLanguage] || 'en-US';
+      document.documentElement.lang = currentLanguage;
+      document.documentElement.dir = ['ar', 'fa'].includes(currentLanguage) ? 'rtl' : 'ltr';
+      languageSelect.value = currentLanguage;
+      document.title = tr('title');
+      const map = {
+        '.brand p': 'brandSub', '.eyebrow': 'eyebrow', '.intro h2': 'heading', '.intro p': 'intro', '.card-heading h3': 'enter', '.required-note': 'required',
+        '#sectionIdentification': 'identification', '#sectionTroops': 'troopsSection', '#sectionAvailability': 'availabilitySection',
+        'label[for="alliance"]': 'alliance', 'label[for="player"]': 'player', 'label[for="troops"]': 'troops', 'label[for="tier"]': 'tier', 'label[for="marchSize"]': 'march', 'label[for="groupAttack"]': 'group', '#availabilityLabel': 'availability', 'label[for="captain"]': 'captain',
+        '.info-card h3': 'infoTitle', '.info-card p': 'infoText', '.step:nth-child(1) strong': 'step1', '.step:nth-child(1) small': 'step1a', '.step:nth-child(2) strong': 'step2', '.step:nth-child(2) small': 'step2a', '.step:nth-child(3) strong': 'step3', '.step:nth-child(3) small': 'step3a',
+        '.admin-card h3': 'localTitle', '.warning': 'warning', '.responses h3': 'collected', '.responses-head .required-note': 'preview', 'footer': 'footer'
+      };
+      Object.entries(map).forEach(([selector, key]) => { const element = document.querySelector(selector); if (element) element.textContent = tr(key); });
+      document.querySelector('#marchSize + .hint').textContent = tr('minHint');
+      document.querySelector('#alliance').placeholder = currentLanguage === 'de' ? 'z. B. PMC' : 'e.g. PMC';
+      document.querySelector('#player').placeholder = currentLanguage === 'de' ? 'Ihr In-Game-Name' : 'Your in-game name';
+      document.querySelector('#marchSize').placeholder = tr('marchPlaceholder');
+      document.querySelector('#groupAttack').placeholder = tr('marchPlaceholder');
+      document.querySelectorAll('#troops option')[0].textContent = tr('choose'); document.querySelectorAll('#tier option')[0].textContent = tr('choose'); document.querySelectorAll('#captain option')[0].textContent = tr('choose');
+      document.querySelector('#availability1 + label').textContent = tr('first'); document.querySelector('#availability2 + label').textContent = tr('second'); document.querySelector('#availability3 + label').textContent = tr('both');
+      document.querySelectorAll('#captain option')[1].textContent = tr('yes'); document.querySelectorAll('#captain option')[2].textContent = tr('no');
+      document.querySelector('#submitButton').textContent = tr('submit'); document.querySelector('#resetButton').textContent = tr('reset');
+      document.querySelector('#toggleResponses').textContent = panel.classList.contains('visible') ? tr('hide') : tr('show'); document.querySelector('#downloadCsv').textContent = tr('csv'); document.querySelector('#clearResponses').textContent = tr('clear');
+      document.querySelector('#shiftTimeFirst').textContent = localShiftTime('first'); document.querySelector('#shiftTimeSecond').textContent = localShiftTime('second');
+      render();
+    }
+
+    function clean(value) {
+      return String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[character]));
+    }
+    function getFormData() {
+      const data = {};
+      fields.forEach(key => {
+        if (key === 'availability') data[key] = document.querySelector('input[name="availability"]:checked')?.value || '';
+        else data[key] = document.getElementById(key).value.trim();
+      });
+      return data;
+    }
+    let currentLanguage = 'en';
+    let currentLocale = 'en-US';
+    function formatNumber(value) { return new Intl.NumberFormat(currentLocale).format(Number(value)); }
+    function render() {
+      counter.textContent = responses.length === 0 ? tr('none') : `${responses.length} ${responses.length === 1 ? tr('savedOne') : tr('savedMany')}`;
+      rows.innerHTML = responses.length ? responses.map(item => `<tr>${fields.map(key => `<td>${key === 'marchSize' || key === 'groupAttack' ? formatNumber(item[key]) : clean(item[key])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="8" class="empty">${tr('empty')}</td></tr>`;
+    }
+    function showStatus(message, type) { statusBox.textContent = message; statusBox.className = `status ${type}`; }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const data = getFormData();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        showStatus(tr('requiredError'), 'error');
+        return;
+      }
+      if (Number(data.marchSize) < 50000 || Number(data.groupAttack) < 50000) {
+        showStatus(tr('minError'), 'error');
+        return;
+      }
+      if (Number(data.marchSize) % 5000 !== 0 || Number(data.groupAttack) % 5000 !== 0) {
+        showStatus(tr('stepError'), 'error');
+        return;
+      }
+      responses.push(data);
+      render();
+      form.reset();
+      showStatus(tr('submitOk'), 'success');
+      panel.classList.add('visible');
     });
 
-    const availSelect = document.getElementById('optAvailability');
-    const shifts = [
-        { value: "Shift 1", text: lang.shift1 + ' - ' + localTimeShift1 },
-        { value: "Shift 2", text: lang.shift2 + ' - ' + localTimeShift2 },
-        { value: "Both Shifts", text: lang.shiftBoth + ' (' + localTimeShift1 + ' / ' + localTimeShift2 + ')' }
-    ];
-    shifts.forEach(shift => {
-        let opt = document.createElement('option'); opt.value = shift.value; opt.innerText = shift.text; availSelect.appendChild(opt);
+    form.addEventListener('reset', () => { window.setTimeout(() => showStatus('', ''), 0); });
+    document.getElementById('toggleResponses').addEventListener('click', () => {
+      panel.classList.toggle('visible');
+      document.getElementById('toggleResponses').textContent = panel.classList.contains('visible') ? tr('hide') : tr('show');
+    });
+    document.getElementById('clearResponses').addEventListener('click', () => {
+      if (!responses.length || confirm(tr('clear') + '?')) {
+        responses.splice(0, responses.length); render(); panel.classList.remove('visible');
+        document.getElementById('toggleResponses').textContent = tr('show');
+        showStatus(tr('deleted'), 'success');
+      }
+    });
+    document.getElementById('downloadCsv').addEventListener('click', () => {
+      if (!responses.length) { showStatus(tr('csvEmpty'), 'error'); return; }
+      const csv = '\ufeff' + csvRows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\n');
+      const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a'); link.href = url; link.download = 'shift-planner-antworten.csv'; link.click();
+      URL.revokeObjectURL(url);
+      showStatus(tr('csvOk'), 'success');
     });
 
-    try {
-        const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        document.getElementById('tzInfo').innerText = lang.tzDetect + tzName;
-    } catch(e) { document.getElementById('tzInfo').style.display = 'none'; }
-
-    document.getElementById('optCaptain').innerHTML = `
-        <label class="radio-label"><input type="radio" name="captain" value="Yes" required> ${lang.yes}</label>
-        <label class="radio-label"><input type="radio" name="captain" value="No"> ${lang.no}</label>
-    `;
-</script>
+    languageSelect.addEventListener('change', event => applyLanguage(event.target.value));
+    applyLanguage(browserLanguage(), true);
+  </script>
 </body>
 </html>
